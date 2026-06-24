@@ -1,0 +1,4 @@
+# Build output (must be compiled + signed locally; not version-controlled)
+/sepw
+
+.DS_Store
