@@ -23,11 +23,19 @@ The installer builds from source — a Secure Enclave binary has to be compiled 
 ## Usage
 
 ```bash
+sepw init              # create the Secure Enclave key (optional; add does it too)
 sepw add github-pw     # prompts for the value (hidden); creates the key the first time
 sepw get github-pw     # prints it back after Touch ID (or your login password)
 sepw ls                # list entry names
 sepw rm github-pw      # remove an entry
 ```
+
+Creating the key requires an unlocked, logged-in desktop session and a login
+password on the Mac (Touch ID recommended) — it can't be done over SSH or on a
+locked screen. Running `sepw init` once at a real keyboard gets this out of the
+way; after that, `add` and `get` behave as above. If you see
+`Failed to create Secure Enclave key … unable to generate key`, that's the
+machine refusing to mint a user-presence key in a headless or locked state.
 
 It's built for pipes and command substitution: secrets go in on stdin, come out on stdout, and everything else stays on stderr.
 

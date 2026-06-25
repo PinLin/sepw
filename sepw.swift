@@ -57,9 +57,30 @@ func ensureKey() {
         writeFile(keyBlobPath, key.dataRepresentation)
         writeFile(keyPubPath, key.publicKey.rawRepresentation)
         info("Created a key in this Mac's Secure Enclave.")
-    } catch {
+    } catch let error as NSError {
+        // -25308 errSecInteractionNotAllowed: the Secure Enclave could not satisfy
+        // the user-presence requirement because no GUI auth UI is available.
+        if error.code == errSecInteractionNotAllowed {
+            die("""
+            Failed to create Secure Enclave key: user interaction is not allowed.
+            The key must be created from a logged-in desktop session, not over SSH
+            or a locked screen, and this Mac must have a login password set
+            (Touch ID recommended). Unlock the Mac, open Terminal there, and rerun.
+            Underlying error: \(error)
+            """)
+        }
         die("Failed to create Secure Enclave key: \(error)")
     }
+}
+
+// Explicit `init`: create the key (or report it already exists). Useful for setting
+// up the key while the Mac is unlocked, before any `add`.
+func initKey() {
+    if FileManager.default.fileExists(atPath: keyBlobPath) {
+        info("Already initialized: a Secure Enclave key exists at \(keyBlobPath).")
+        return
+    }
+    ensureKey()
 }
 
 func loadPublicKey() -> P256.KeyAgreement.PublicKey {
@@ -167,6 +188,7 @@ func removeItem(name: String) {
 func usage(asError: Bool = true) -> Never {
     let text = """
     Usage:
+      sepw init          Create the Secure Enclave key (run on an unlocked desktop)
       sepw add <name>    Add an entry (input hidden; key is created on first use)
       sepw get <name>    Decrypt and print (requires Touch ID or login password)
       sepw ls            List entry names
@@ -184,6 +206,8 @@ let args = CommandLine.arguments
 guard args.count >= 2 else { usage(asError: false) }   // no args → show help, exit 0
 
 switch args[1] {
+case "init":
+    initKey()
 case "add":
     guard args.count >= 3 else { usage() }
     addItem(name: args[2])
