@@ -1,6 +1,6 @@
 # sepw
 
-Keep passwords and other secrets in your Mac's Secure Enclave, and let scripts read them back behind a Touch ID prompt. No accounts, no cloud, no dependencies — just Apple's own frameworks and a single Swift file.
+Keep passwords, secrets and TOTP seeds in your Mac's Secure Enclave — read them back, or generate two-factor codes, behind a Touch ID prompt. No accounts, no cloud, no dependencies — just Apple's own frameworks and a single Swift file.
 
 ## Requirements
 
