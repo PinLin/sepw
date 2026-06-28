@@ -26,8 +26,31 @@ The installer builds from source — a Secure Enclave binary has to be compiled 
 sepw init              # create the Secure Enclave key (optional; add does it too)
 sepw add github-pw     # prompts for the value (hidden); creates the key the first time
 sepw get github-pw     # prints it back after Touch ID (or your login password)
+sepw totp github-2fa   # generate a TOTP code from a stored secret (after Touch ID)
 sepw ls                # list entry names
 sepw rm github-pw      # remove an entry
+```
+
+### TOTP (two-factor codes)
+
+Store a TOTP secret like any other entry — either a bare base32 seed or the whole
+`otpauth://` URI from a QR code — then ask for a code:
+
+```bash
+sepw add github-2fa            # paste the base32 seed or otpauth:// URI
+sepw totp github-2fa           # 6-digit code, after Touch ID
+sepw totp github-2fa --digits 8
+```
+
+The secret is decrypted inside the Secure Enclave and the code is computed in
+process — only the digits reach stdout, never the seed. When the stored value is
+an `otpauth://` URI, its `digits`, `period` and `algorithm` are honored; CLI flags
+override them.
+
+```
+--digits N       Code length, 6-8 (default 6)
+--period S       Time step in seconds (default 30)
+--algorithm X    SHA1, SHA256 or SHA512 (default SHA1)
 ```
 
 Creating the key requires an unlocked, logged-in desktop session and a login
